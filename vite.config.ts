@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => {
           "./src/routes/**/*.{ts,tsx}",
           "./src/components/**/*.tsx",
           "./src/lib/*.ts",
+          "!./src/**/*.test.{ts,tsx}",
           "./src/styles.css",
         ],
       },
