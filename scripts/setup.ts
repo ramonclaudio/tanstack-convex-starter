@@ -151,7 +151,6 @@ function spawnCapture(
       if (settled) return
       settled = true
       if (timer) clearTimeout(timer)
-      // oxlint-disable-next-line promise/no-multiple-resolved
       resolve({ code, stdout, stderr })
     }
     proc.once("exit", (code, signal) => finish(code ?? (signal ? 1 : 0)))
