@@ -90,13 +90,14 @@ export default defineConfig(({ mode }) => {
           "/**": { headers: securityHeaders },
         },
       }),
-      process.env.ANALYZE &&
-        visualizer({
-          filename: ".output/stats.html",
-          open: true,
-          gzipSize: true,
-          brotliSize: true,
-        }),
-    ].filter(Boolean),
+      process.env.ANALYZE
+        ? visualizer({
+            filename: ".output/stats.html",
+            open: true,
+            gzipSize: true,
+            brotliSize: true,
+          })
+        : false,
+    ],
   }
 })
