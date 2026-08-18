@@ -19,13 +19,21 @@ concurrency:
 
 jobs:
   verify:
-    name: ${{ matrix.pm }}
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        pm: [bun, pnpm, npm, yarn]
+        include:
+          - { pm: bun, name: bun }
+          - { pm: npm, name: npm }
+          - { pm: yarn, name: yarn }
+          - { pm: pnpm, name: pnpm 10, pnpm-version: 10 }
+          - { pm: pnpm, name: pnpm 11, pnpm-version: 11 }
+          # pnpm 12 is still a release candidate, so it needs the dist tag.
+          # Swap this for "12" once 12.0.0 ships.
+          - { pm: pnpm, name: pnpm 12, pnpm-version: next-12 }
     steps:
       - uses: actions/checkout@v6
 
@@ -45,7 +53,7 @@ jobs:
         if: matrix.pm == 'pnpm'
         uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: ${{ matrix.pnpm-version }}
           run_install: false
 
       - name: Install
