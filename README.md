@@ -10,7 +10,7 @@ Live demo: https://tanvex-demo.vercel.app
 
 ## Quick start
 
-Needs Node 22.12+ or [Bun](https://bun.sh), a [Convex](https://convex.dev) account (free tier), and a [Resend](https://resend.com/api-keys) API key (`re_...`, free tier is 3k/month).
+Needs Node 22.22+ or [Bun](https://bun.sh), a [Convex](https://convex.dev) account (free tier), and a [Resend](https://resend.com/api-keys) API key (`re_...`, free tier is 3k/month).
 
 ```bash
 git clone https://github.com/ramonclaudio/tanvex.git
