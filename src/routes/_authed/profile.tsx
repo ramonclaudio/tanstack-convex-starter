@@ -40,6 +40,7 @@ import { authClient } from "@/lib/auth-client"
 import { fetchAuthQuery } from "@/lib/auth-server"
 import { seo } from "@/lib/seo"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { useServerSyncedForm } from "@/lib/use-server-synced-form"
 import { cn } from "@/lib/utils"
 
 const fetchProfileData = createServerFn({ method: "GET" }).handler(async () => {
@@ -155,31 +156,18 @@ function ProfileContent({ preloadedUser }: { preloadedUser: PreloadedUser }) {
   const currentUser = user ?? preloadedUser
   const originalUsername = currentUser?.displayUsername ?? currentUser?.username ?? ""
 
-  const [formData, setFormData] = useState({
-    name: currentUser?.name ?? "",
-    username: currentUser?.displayUsername ?? currentUser?.username ?? "",
-    bio: currentUser?.bio ?? "",
-  })
-
-  // Sync formData to currentUser when it changes (e.g. live query resolved
-  // after mount, or a different tab updated the profile). Skip while editing
-  // so we don't clobber the user's in-progress changes.
-  const currentUserId = currentUser?._id
-  useEffect(() => {
-    if (isEditing) return
-    setFormData({
+  const {
+    values: formData,
+    setValues: setFormData,
+    reset: resetFormValues,
+  } = useServerSyncedForm(
+    {
       name: currentUser?.name ?? "",
       username: currentUser?.displayUsername ?? currentUser?.username ?? "",
       bio: currentUser?.bio ?? "",
-    })
-  }, [
-    currentUserId,
-    currentUser?.name,
-    currentUser?.displayUsername,
-    currentUser?.username,
-    currentUser?.bio,
-    isEditing,
-  ])
+    },
+    { frozen: isEditing, identity: currentUser?._id },
+  )
 
   const checkUsernameAvailability = useCallback(
     async (username: string) => {
@@ -247,7 +235,7 @@ function ProfileContent({ preloadedUser }: { preloadedUser: PreloadedUser }) {
         usernameCheckTimeoutRef.current = setTimeout(() => checkUsernameAvailability(username), 500)
       }
     },
-    [checkUsernameAvailability, originalUsername],
+    [checkUsernameAvailability, originalUsername, setFormData],
   )
 
   useEffect(() => {
@@ -257,11 +245,7 @@ function ProfileContent({ preloadedUser }: { preloadedUser: PreloadedUser }) {
   }, [])
 
   const resetForm = () => {
-    setFormData({
-      name: currentUser?.name ?? "",
-      username: currentUser?.displayUsername ?? currentUser?.username ?? "",
-      bio: currentUser?.bio ?? "",
-    })
+    resetFormValues()
     setUsernameAvailable(null)
     setUsernameError(null)
   }

@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => {
           "./src/routes/**/*.{ts,tsx}",
           "./src/components/**/*.tsx",
           "./src/lib/*.ts",
+          "!./src/**/*.test.{ts,tsx}",
           "./src/styles.css",
         ],
       },
@@ -90,13 +91,14 @@ export default defineConfig(({ mode }) => {
           "/**": { headers: securityHeaders },
         },
       }),
-      process.env.ANALYZE &&
-        visualizer({
-          filename: ".output/stats.html",
-          open: true,
-          gzipSize: true,
-          brotliSize: true,
-        }),
-    ].filter(Boolean),
+      process.env.ANALYZE
+        ? visualizer({
+            filename: ".output/stats.html",
+            open: true,
+            gzipSize: true,
+            brotliSize: true,
+          })
+        : false,
+    ],
   }
 })

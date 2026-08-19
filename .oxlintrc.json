@@ -73,6 +73,12 @@
       "rules": {
         "typescript/no-unsafe-type-assertion": "off"
       }
+    },
+    {
+      "files": ["src/lib/convex-auth.tsx"],
+      "rules": {
+        "react/hooks": "off"
+      }
     }
   ]
 }

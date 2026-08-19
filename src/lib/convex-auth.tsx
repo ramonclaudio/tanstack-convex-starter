@@ -1,6 +1,6 @@
 import { ConvexProviderWithAuth } from "convex/react"
 import type { ConvexReactClient } from "convex/react"
-import { useCallback, useMemo, useRef } from "react"
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
 import { authClient } from "@/lib/auth-client"
@@ -69,6 +69,15 @@ function useBetterAuthForConvex(initialToken: string | null) {
   )
 }
 
+const InitialTokenContext = createContext<string | null>(null)
+
+// Module scope, so ConvexProviderWithAuth gets the same useAuth identity on
+// every render. Anything rebuilt per render re-triggers its auth cycle, which
+// is the churn this bridge exists to avoid.
+function useAuthBridge() {
+  return useBetterAuthForConvex(useContext(InitialTokenContext))
+}
+
 export function BetterAuthConvexProvider({
   children,
   client,
@@ -79,21 +88,14 @@ export function BetterAuthConvexProvider({
   initialToken?: string | null
 }) {
   // First value wins: __root's beforeLoad re-runs on every navigation and
-  // mints a fresh JWT string each time. Rebuilding useAuth on each of those
-  // would re-trigger ConvexProviderWithAuth's auth cycle (the exact churn
-  // this bridge exists to avoid). The seed only matters before the client
-  // session resolves, so later values carry no information.
-  const initialTokenRef = useRef(initialToken ?? null)
-  const useAuth = useMemo(
-    () =>
-      function useAuthBridge() {
-        return useBetterAuthForConvex(initialTokenRef.current)
-      },
-    [],
-  )
+  // mints a fresh JWT string each time. The seed only matters before the
+  // client session resolves, so later values carry no information.
+  const [seedToken] = useState(initialToken ?? null)
   return (
-    <ConvexProviderWithAuth client={client} useAuth={useAuth}>
-      {children}
-    </ConvexProviderWithAuth>
+    <InitialTokenContext value={seedToken}>
+      <ConvexProviderWithAuth client={client} useAuth={useAuthBridge}>
+        {children}
+      </ConvexProviderWithAuth>
+    </InitialTokenContext>
   )
 }
